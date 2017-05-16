@@ -11,10 +11,11 @@ void SystemInit()
 {
 	/*hardware Initialize*/
 	IOInit();
-	ClockInit();
+	ClockInit();//20170512 ?? clock maybe 21MHZ
 	UARTInit();
 	SPIInit();
 	ADCInit();
+	PWMInit();
 	
 	/*software Initialize*/
 	
@@ -48,10 +49,12 @@ int ClockInit()
      periph_clk_khz = core_clk_khz / (((SIM_CLKDIV1 & SIM_CLKDIV1_OUTDIV4_MASK) >> 16)+ 1);  
      
      SIM_SOPT2 |= SIM_SOPT2_UART0SRC(1); // select the FLLFLLCLK as UART0 clock source
+     SIM_SOPT2 |= SIM_SOPT2_TPMSRC(1);//select the MCGFLLCLK as TPM clock source
      SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;//enable uart0 clock gate
      SIM_SCGC4 |= SIM_SCGC4_SPI0_MASK;//ENABLE SPI0 CLOCK GATE
      SIM_SCGC4 |= SIM_SCGC4_I2C0_MASK;//enable i2c clock gate
      SIM_SCGC5 |= (SIM_SCGC5_PORTA_MASK|SIM_SCGC5_PORTB_MASK);//ENABLE PORTA PORTB CLOCK GATE
+     SIM_SCGC6 |= SIM_SCGC6_TPM0_MASK;//enable TPM0 clock gate
     
 	return 0;
 }
@@ -75,13 +78,31 @@ int IOInit()
 {
 	/* PTB1 uart0_tx alt2
 	 * PTB2 uart0_rx alt2*/
-	PORTB_PCR1 = PORT_PCR_MUX(2);
-	PORTB_PCR2 = PORT_PCR_MUX(2);
+	PORTB_PCR1 |= PORT_PCR_MUX(2);
+	PORTB_PCR2 |= PORT_PCR_MUX(2);
+	/* PTA19 SPI0_SS
+	 * PTB15 SPI0_MISO
+	 * PTB16 SPI0_MOSI
+	 * PTB17 SPI0_SCK
+	 * PTB12 SYNC
+	 * PTB13 LDAC
+	 * */
+	PORTA_PCR19 |= PORT_PCR_MUX(3);
+	PORTB_PCR15 |= PORT_PCR_MUX(3);
+	PORTB_PCR16 |= PORT_PCR_MUX(3);
+	PORTB_PCR17 |= PORT_PCR_MUX(3);
+	PORTB_PCR12 |= PORT_PCR_MUX(1);//GPIO
+	PORTB_PCR13 |= PORT_PCR_MUX(1);//GPIO
+	/**
+	 * PTB9 TPM0_CH2 PULSE GENERATE
+	 * */
+	PORTB_PCR9 |= PORT_PCR_MUX(2);//PWM TPM0_CH2
+	
 	return 0;
 }
 int SPIInit()
 {
-	
+	SPI0Init();
 	return 0;
 }
 
@@ -93,7 +114,7 @@ int UARTInit()
 
 int PWMInit()
 {
-	
+	TPM0Init(PULSECHANNEL);
 	return 0;
 }
 
