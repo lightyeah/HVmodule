@@ -21,10 +21,11 @@ int IOInit();
 int SPIInit();
 int UARTInit();
 int PWMInit();
-
 int OLEDInit();
 int DACInit();
 
 void delay(void);
 void delay_n_plus_100ms(unsigned char delay_number);
+
+unsigned int mathmo(int a);//数值取模
 #endif /* SYSINIT_H_ */

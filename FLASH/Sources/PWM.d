@@ -30,7 +30,9 @@ Sources/PWM.o: ../Sources/PWM.c \
  ../Sources/ADC.h ../Sources/SPI.h ../Sources/I2C.h ../Sources/PWM.h \
  ../Sources/SYSINIT.h ../Sources/UART.h ../Sources/OLED.h \
  ../Sources/DAC.h ../Sources/mcg.h ../Sources/arm_cm0.h \
- ../Sources/board.h
+ ../Sources/board.h \
+ D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/locale.h \
+ D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/clocale
 
 D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/lib_ewl.prefix:
 
@@ -109,3 +111,7 @@ D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/arm/stdarg.ARM
 ../Sources/arm_cm0.h:
 
 ../Sources/board.h:
+
+D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/locale.h:
+
+D:/Freescale/CW\ MCU\ v10.5/MCU/ARM_GCC_Support/ewl/EWL_C/include/clocale:

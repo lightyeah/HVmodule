@@ -25,6 +25,7 @@
 #include "mcg.h"
 #include "arm_cm0.h"
 #include "board.h"
+#include "locale.h"
 /** PIN MAP
  *  funtion                       pin        ALT
  *  UART0_TX                      PTB1        2
@@ -41,7 +42,16 @@
  *  HV_ADC                        PTA9        0 ADC0_SE2
  *
  */
+typedef float hvtype;
 
+
+#define  NORMALCLOCK   20970000//HZ
+/***
+ * when HV_R>= 2100 set HV_S = 0
+ * */
+#define  HVERROR       2000.0//V 保护电压
+#define  HVMAX         1800.0//V  最大电压
+#define  HVDEVIATION   40.0//V 实际电压与设置电压之间的误差范围
 /* Actual system clock frequency */
 int mcg_clk_hz;
 int mcg_clk_khz;
@@ -49,6 +59,10 @@ int core_clk_khz;
 int periph_clk_khz;
 int pll_clk_khz;
 int uart0_clk_khz;
+
+
+
+
 
 
 #endif /* COMMON_H_ */

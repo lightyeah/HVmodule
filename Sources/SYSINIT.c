@@ -10,8 +10,11 @@
 void SystemInit()
 {
 	/*hardware Initialize*/
-	IOInit();
 	ClockInit();//20170512 ?? clock maybe 21MHZ
+	IOInit();
+	asm("CPSIE i");//全局中断开启
+	//NVIC_ISER |= NVIC_ISER_SETENA(12);//UART0 STATUS AND ERROR 
+	NVIC_ISER |= 0x1000;
 	UARTInit();
 	SPIInit();
 	ADCInit();
@@ -29,6 +32,7 @@ int ClockInit()
     //    or pll init hangs waiting for OSC to initialize
     // if osc enabled in low power modes - enable it first before ack
     // if I/O needs to be maintained without glitches enable outputs and modules first before ack.
+#ifndef NORMALCLOCK
     if (PMC_REGSC &  PMC_REGSC_ACKISO_MASK)
     PMC_REGSC |= PMC_REGSC_ACKISO_MASK;
     /* Ramp up the system clock */
@@ -47,7 +51,7 @@ int ClockInit()
      mcg_clk_khz = mcg_clk_hz / 1000;
   	 core_clk_khz = mcg_clk_khz / (((SIM_CLKDIV1 & SIM_CLKDIV1_OUTDIV1_MASK) >> 28)+ 1);
      periph_clk_khz = core_clk_khz / (((SIM_CLKDIV1 & SIM_CLKDIV1_OUTDIV4_MASK) >> 16)+ 1);  
-     
+#endif
      SIM_SOPT2 |= SIM_SOPT2_UART0SRC(1); // select the FLLFLLCLK as UART0 clock source
      SIM_SOPT2 |= SIM_SOPT2_TPMSRC(1);//select the MCGFLLCLK as TPM clock source
      SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;//enable uart0 clock gate
@@ -55,13 +59,14 @@ int ClockInit()
      SIM_SCGC4 |= SIM_SCGC4_I2C0_MASK;//enable i2c clock gate
      SIM_SCGC5 |= (SIM_SCGC5_PORTA_MASK|SIM_SCGC5_PORTB_MASK);//ENABLE PORTA PORTB CLOCK GATE
      SIM_SCGC6 |= SIM_SCGC6_TPM0_MASK;//enable TPM0 clock gate
+     SIM_SCGC6 |= SIM_SCGC6_ADC0_MASK;//enable ADC0 clock gate
     
 	return 0;
 }
 
 int ADCInit()
 {
-	
+	ADC0Init();
 	return 0;
 }
 
@@ -97,6 +102,9 @@ int IOInit()
 	 * PTB9 TPM0_CH2 PULSE GENERATE
 	 * */
 	PORTB_PCR9 |= PORT_PCR_MUX(2);//PWM TPM0_CH2
+	/**
+	 * PTA9 ADC0_SE2 
+	 * */
 	
 	return 0;
 }
@@ -108,7 +116,13 @@ int SPIInit()
 
 int UARTInit()
 {
+#ifndef NORMALCLOCK
 	UART0Init(uart0_clk_khz,TERMINAL_BAUD);
+#endif
+	
+#ifdef NORMALCLOCK
+	UART0Init_(TERMINAL_BAUD);
+#endif
 	return 0;
 }
 
@@ -166,4 +180,10 @@ void delay_n_plus_100ms(unsigned char delay_number)
 			}
 		}
 	}
+}
+
+unsigned int mathmo(int a)
+{
+	if(a>=0)return a;
+	if(a<0)return (-a);
 }
