@@ -21,7 +21,7 @@ void SystemInit()
 	PWMInit();
 	
 	/*software Initialize*/
-	
+	DACInit();
 	
 }
 
@@ -92,12 +92,29 @@ int IOInit()
 	 * PTB12 SYNC
 	 * PTB13 LDAC
 	 * */
-	PORTA_PCR19 |= PORT_PCR_MUX(3);
 	PORTB_PCR15 |= PORT_PCR_MUX(3);
+	PORTB_PCR15 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
 	PORTB_PCR16 |= PORT_PCR_MUX(3);
+	PORTB_PCR16 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
 	PORTB_PCR17 |= PORT_PCR_MUX(3);
-	PORTB_PCR12 |= PORT_PCR_MUX(1);//GPIO
-	PORTB_PCR13 |= PORT_PCR_MUX(1);//GPIO
+	PORTB_PCR17 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
+	
+	PORTA_PCR19 |= PORT_PCR_MUX(1);//GPIO output as RESET and enable the pullup resister
+	PORTA_PCR19 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
+	GPIOA_PDDR |= GPIO_PDDR_PDD(19);//output and set output as logic 1
+	GPIOA_PDOR |= GPIO_PDOR_PDO(19);	
+	
+	PORTB_PCR12 |= PORT_PCR_MUX(1);//GPIO output as SYNC and enable the pullup resister
+	PORTB_PCR12 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
+	GPIOB_PDDR |= 0x1000;//GPIO_PDDR_PDD(12);//output and set output as logic 1
+	GPIOB_PDOR |= 0x1000;//GPIO_PDOR_PDO(12);	
+	//GPIOB_PDOR &=~ GPIO_PDOR_PDO(12);
+	
+	PORTB_PCR13 |= PORT_PCR_MUX(1);//GPIO output as LDAC and enable the pullup resister
+	PORTB_PCR13 |= PORT_PCR_PS_MASK + PORT_PCR_PE_MASK;
+	GPIOB_PDDR |= 0x2000;//output and set output as logic 1
+	GPIOB_PDOR |= 0x2000;	
+	
 	/**
 	 * PTB9 TPM0_CH2 PULSE GENERATE
 	 * */
@@ -111,6 +128,17 @@ int IOInit()
 int SPIInit()
 {
 	SPI0Init();
+	return 0;
+}
+
+int DACInit()
+{
+	GPIOA_PDOR |= GPIO_PDOR_PDO(19);
+	delay_n_plus_1ms(10);
+	GPIOA_PDOR &=~ GPIO_PDOR_PDO(19);
+	delay_n_plus_1ms(10);
+	GPIOA_PDOR |= GPIO_PDOR_PDO(19);
+	delay_n_plus_1ms(5);
 	return 0;
 }
 
@@ -139,11 +167,7 @@ int OLEDInit()
 	return 0;
 }
 
-int DACInit()
-{
-	
-	return 0;
-}
+
 void delay(void)
 {
 	unsigned char i,j,k;
@@ -181,7 +205,24 @@ void delay_n_plus_100ms(unsigned char delay_number)
 		}
 	}
 }
-
+void delay_n_plus_1ms(unsigned char delay_number)
+{
+	unsigned char i,j,k,m;
+	if(0 == delay_number)
+	{
+		delay_number = 1;
+	}
+	for(m=0;m<delay_number;m++)
+	{
+		for(k=0;k<0x8;k++)
+		{
+				for(j=0;j<0x80;j++)
+				{
+					asm("nop");
+				}
+		}
+	}	
+}
 unsigned int mathmo(int a)
 {
 	if(a>=0)return a;

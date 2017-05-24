@@ -11,6 +11,7 @@
 #define COMMANDHEAD02    'M'//0x4d
 #define COMMANDADRHV     'J'//0x4a
 #define COMMANDADRDEB    'K'//0x4b
+#define COMMANDNANODAC   'N'//0x4e
 #define COMMANDEND       'Z'//0x5a
 
 
@@ -27,6 +28,7 @@
     extern hvtype HV_Target;
     hvtype Temp_HV_Target;
     hvtype Temp_HV_Real;
+    unsigned int Temp_DAC_Set;
     
     /**状态机解读串口命令
      * 
@@ -427,6 +429,21 @@ void UART0_IRQHandler(void)
 				CheckCode = 0;
 			}
 			break;
+		case COMMANDNANODAC://命令 N 调试DAC
+			if(CommandState == ADR)
+			{
+				CommandState = DATA;
+				CheckCode += R_Data;
+				//UART0SendChar(CheckCode);
+				CommandAddress = COMMANDNANODAC;
+			}
+			else
+			{
+				CommandState = IDLE;
+				CheckCode = 0;
+			}
+				
+			break;
 		case COMMANDEND://命令Z 指令结束 0x5a
 			//UART0SendChar(COMMANDEND);
 			if(CommandState == DATAE)//指令数据接收完成
@@ -505,6 +522,16 @@ void CommandGetData(char commandaddress, char data, int dataaddress)
 			Temp_HV_Real += (hvtype)Char2Num(data);
 		}
 		break;
+	case COMMANDNANODAC:
+		if(dataaddress==(int)DATA01)
+		{
+			Temp_DAC_Set = (unsigned int)Char2Num(data)*100;
+		}
+		if(dataaddress==(int)DATA02)
+		{
+			Temp_DAC_Set += (unsigned int)Char2Num(data);
+		}
+		break;
 	default:
 		break;
 	}
@@ -518,8 +545,12 @@ void UARTCommandOutput()
 	UART0SendString(str);*/
 	HV_Target = Temp_HV_Target;
 	HV_Real = Temp_HV_Real;
+	if(Temp_DAC_Set>5000)Temp_DAC_Set = 5000;
+	unsigned short data = (Temp_DAC_Set*65536/5000);
+	NanoDACWrite(0b0011,0b0001,data);
 	char str[50];
-	sprintf(str,"uart hv*10 s%d t%d r%d\n",(int)(HV_Set*10),(int)(HV_Target*10),(int)(HV_Real*10));
+	//sprintf(str,"uart hv*10 s%d t%d r%d\n",(int)(HV_Set*10),(int)(HV_Target*10),(int)(HV_Real*10));
+	sprintf(str,"dac v*1000 s%d h%d\n",Temp_DAC_Set,data);
 	UART0SendString(str);
 	
 	

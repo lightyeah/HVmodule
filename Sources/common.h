@@ -52,6 +52,9 @@ typedef float hvtype;
 #define  HVERROR       2000.0//V 保护电压
 #define  HVMAX         1800.0//V  最大电压
 #define  HVDEVIATION   40.0//V 实际电压与设置电压之间的误差范围
+
+#define  DACMAX        5.0//DAC最大输出电压
+#define  DACACCURACY   65536//16bit 精度
 /* Actual system clock frequency */
 int mcg_clk_hz;
 int mcg_clk_khz;

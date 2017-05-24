@@ -24,9 +24,14 @@ int main(void)
  {
 	SystemInit();
 	UART0SendString((unsigned char*)"helloworld\r\n");
-	for(;;) {	   
+	//NanoDACWrite(0b0011,0b0001,0xaaaa);
+	//NanoDACSetVoltage(VOUTA,4.1111);
+	//NanoDACWrite(0b0011,0b0001,0xd27b);
+	for(;;) {	
+		
 	   	/*application*/
-		HVControl();
+		//HVControl();
+		delay_n_plus_1ms(2);
         UIControl();
         PulseControl();
 		
@@ -66,7 +71,7 @@ void HVControl()
 	}
 	if(mathmo(HV_Real-HV_Set)<HVDEVIATION)
 	{
-		if(HV_Target > HV_Real)
+		if(HV_Target >= HV_Real)
 		{
 			HV_Diff[1]=HV_Diff[0];
 			HV_Diff[0]=HV_Target-HV_Real;
